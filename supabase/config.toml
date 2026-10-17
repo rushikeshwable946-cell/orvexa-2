@@ -1,0 +1,11 @@
+[functions.ai-chat]
+verify_jwt = true
+
+[functions.generate-image]
+verify_jwt = true
+
+[functions.edit-image]
+verify_jwt = true
+
+[functions.generate-video]
+verify_jwt = true
