@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Mail, Lock, User } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, CheckCircle2 } from 'lucide-react';
 import { Link, useRouter } from '@/context/RouterContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
@@ -7,11 +7,13 @@ import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
+type Mode = 'signin' | 'signup' | 'forgot' | 'reset-success';
+
 export function AuthPage() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resetPassword } = useAuth();
   const { navigate } = useRouter();
   const { toast } = useToast();
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -21,6 +23,23 @@ export function AuthPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (mode === 'forgot') {
+      if (!email) {
+        setError('Please enter your email address.');
+        return;
+      }
+      setLoading(true);
+      const result = await resetPassword(email);
+      setLoading(false);
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      setMode('reset-success');
+      return;
+    }
+
     if (!email || !password) {
       setError('Please fill in all fields.');
       return;
@@ -58,12 +77,14 @@ export function AuthPage() {
         <div className="relative z-10 flex h-full flex-col justify-end p-8 md:p-12">
           <Logo size={36} />
           <h1 className="mt-6 font-display text-2xl md:text-3xl font-bold text-[var(--text-primary)]">
-            {mode === 'signin' ? 'Welcome back to ORVEXA' : 'Start creating with ORVEXA'}
+            {mode === 'signin' ? 'Welcome back to ORVEXA' : mode === 'signup' ? 'Start creating with ORVEXA' : 'Reset your password'}
           </h1>
           <p className="mt-2 text-sm text-[var(--text-secondary)] max-w-sm">
             {mode === 'signin'
               ? 'Sign in to continue your creative journey.'
-              : 'Create your account and get 50 free credits to start.'}
+              : mode === 'signup'
+                ? 'Create your account and get 50 free credits to start.'
+                : 'Enter your email and we will send you a reset link.'}
           </p>
         </div>
       </div>
@@ -79,72 +100,106 @@ export function AuthPage() {
 
         <div className="flex-1 flex items-center justify-center px-6 pb-20">
           <div className="w-full max-w-sm">
-            <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">
-              {mode === 'signin' ? 'Sign In' : 'Create Account'}
-            </h2>
-            <p className="mt-2 text-sm text-[var(--text-secondary)]">
-              {mode === 'signin' ? 'Enter your credentials to access your workspace.' : 'Fill in your details to get started.'}
-            </p>
-
-            <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-              {mode === 'signup' && (
-                <div className="relative">
-                  <User className="absolute left-3 top-[38px] h-4 w-4 text-[var(--text-tertiary)] z-10" />
-                  <Input
-                    label="Display Name"
-                    type="text"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="Your name"
-                    className="pl-10"
-                  />
+            {mode === 'reset-success' ? (
+              <div className="text-center">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--success)]/15 mb-4">
+                  <CheckCircle2 className="h-7 w-7 text-[var(--success)]" />
                 </div>
-              )}
-              <div className="relative">
-                <Mail className="absolute left-3 top-[38px] h-4 w-4 text-[var(--text-tertiary)] z-10" />
-                <Input
-                  label="Email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="pl-10"
-                  required
-                />
+                <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Check your email</h2>
+                <p className="mt-3 text-sm text-[var(--text-secondary)]">
+                  We sent a password reset link to <span className="font-medium text-[var(--text-primary)]">{email}</span>. Click the link in the email to set a new password.
+                </p>
+                <Button
+                  variant="secondary"
+                  className="w-full mt-6"
+                  size="lg"
+                  onClick={() => { setMode('signin'); setEmail(''); }}
+                >
+                  Back to sign in
+                </Button>
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-[38px] h-4 w-4 text-[var(--text-tertiary)] z-10" />
-                <Input
-                  label="Password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="pl-10"
-                  required
-                />
-              </div>
+            ) : (
+              <>
+                <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">
+                  {mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Reset Password'}
+                </h2>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                  {mode === 'signin' ? 'Enter your credentials to access your workspace.' : mode === 'signup' ? 'Fill in your details to get started.' : 'Enter your email to receive a reset link.'}
+                </p>
 
-              {error && (
-                <div className="rounded-lg border border-[var(--error)]/30 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)] animate-fade-in">
-                  {error}
+                <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+                  {mode === 'signup' && (
+                    <div className="relative">
+                      <User className="absolute left-3 top-[38px] h-4 w-4 text-[var(--text-tertiary)] z-10" />
+                      <Input
+                        label="Display Name"
+                        type="text"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="Your name"
+                        className="pl-10"
+                      />
+                    </div>
+                  )}
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-[38px] h-4 w-4 text-[var(--text-tertiary)] z-10" />
+                    <Input
+                      label="Email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                  {mode !== 'forgot' && (
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-[38px] h-4 w-4 text-[var(--text-tertiary)] z-10" />
+                      <Input
+                        label="Password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  )}
+
+                  {error && (
+                    <div className="rounded-lg border border-[var(--error)]/30 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)] animate-fade-in">
+                      {error}
+                    </div>
+                  )}
+
+                  <Button type="submit" className="w-full" size="lg" loading={loading}>
+                    {mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Send Reset Link'}
+                  </Button>
+                </form>
+
+                <div className="mt-6 space-y-2 text-center text-sm text-[var(--text-secondary)]">
+                  {mode === 'signin' && (
+                    <button
+                      onClick={() => { setMode('forgot'); setError(null); setPassword(''); }}
+                      className="block w-full text-[var(--text-tertiary)] hover:text-[var(--accent)] transition-colors"
+                    >
+                      Forgot your password?
+                    </button>
+                  )}
+                  <div>
+                    {mode === 'signin' ? "Don't have an account? " : mode === 'signup' ? 'Already have an account? ' : 'Remember your password? '}
+                    <button
+                      onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(null); }}
+                      className="text-[var(--accent)] font-medium hover:underline"
+                    >
+                      {mode === 'signin' ? 'Sign up' : 'Sign in'}
+                    </button>
+                  </div>
                 </div>
-              )}
-
-              <Button type="submit" className="w-full" size="lg" loading={loading}>
-                {mode === 'signin' ? 'Sign In' : 'Create Account'}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center text-sm text-[var(--text-secondary)]">
-              {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-              <button
-                onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(null); }}
-                className="text-[var(--accent)] font-medium hover:underline"
-              >
-                {mode === 'signin' ? 'Sign up' : 'Sign in'}
-              </button>
-            </div>
+              </>
+            )}
           </div>
         </div>
       </div>

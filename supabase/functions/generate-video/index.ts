@@ -18,7 +18,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const { prompt, aspectRatio, duration, resolution, cameraMovement, mode, sourceImage } = await req.json();
+    const { prompt } = await req.json();
 
     if (!prompt) {
       return new Response(JSON.stringify({ error: "Prompt is required" }), {

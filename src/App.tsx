@@ -22,11 +22,16 @@ import { TermsPage } from '@/pages/TermsPage';
 import { PrivacyPage } from '@/pages/PrivacyPage';
 import { HelpPage } from '@/pages/HelpPage';
 import { ContactPage } from '@/pages/ContactPage';
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { LoadingState } from '@/components/ui/Feedback';
 
 function Routes() {
   const { path } = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading, passwordRecovery } = useAuth();
+
+  if (passwordRecovery) {
+    return <ResetPasswordPage />;
+  }
 
   if (loading) {
     return (

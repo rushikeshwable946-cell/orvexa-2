@@ -18,7 +18,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const { prompt, negativePrompt, aspectRatio, stylePreset, numImages, model } = await req.json();
+    const { prompt, aspectRatio, stylePreset, numImages, model } = await req.json();
 
     if (!prompt || typeof prompt !== "string") {
       return new Response(JSON.stringify({ error: "Prompt is required" }), {

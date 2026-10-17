@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  ImageIcon, Sparkles, Download, Copy, RefreshCw, Wand2,
+  ImageIcon, Sparkles, Download, Copy, RefreshCw,
   AlertCircle, Check, Heart,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase';
 import type { Generation } from '@/types/database';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
-import { LoadingState, EmptyState } from '@/components/ui/Feedback';
+import { EmptyState } from '@/components/ui/Feedback';
 
 const aspectRatios = [
   { value: '1:1', label: '1:1 Square' },

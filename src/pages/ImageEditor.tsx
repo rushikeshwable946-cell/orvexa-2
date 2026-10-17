@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  Wand2, Upload, Download, RefreshCw, AlertCircle,
+  Wand2, Upload, Download, RefreshCw,
   Crop, Maximize2, Eraser, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';

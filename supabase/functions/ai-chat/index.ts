@@ -1,3 +1,4 @@
+// ORVEXA AI Chat edge function — OpenAI Chat Completions
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
 const corsHeaders = {

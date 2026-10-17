@@ -20,7 +20,6 @@ export function AIChat() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [convLoading, setConvLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Conversation | null>(null);
   const [convListOpen, setConvListOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -41,6 +40,7 @@ export function AIChat() {
       setLoading(false);
     }
     loadConversations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   useEffect(() => {
